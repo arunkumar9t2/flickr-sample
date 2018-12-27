@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="in.arunkumarsampath.flickerapp">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:name=".FlickerApp"
         android:allowBackup="true"

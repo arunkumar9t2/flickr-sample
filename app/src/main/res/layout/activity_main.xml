@@ -28,11 +28,12 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <android.support.v7.widget.RecyclerView
-            android:id="@+id/flickerListView"
+            android:id="@+id/imagesListView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layoutManager="android.support.v7.widget.GridLayoutManager"
-            app:spanCount="3" />
+            app:spanCount="3"
+            tools:listitem="@layout/layout_flicker_image_item_template" />
 
     </android.support.v4.widget.SwipeRefreshLayout>
 
