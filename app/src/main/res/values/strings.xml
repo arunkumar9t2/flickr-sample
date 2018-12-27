@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Flicker app</string>
+    <string name="search_flickr">Search Flicker</string>
 </resources>
