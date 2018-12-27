@@ -1,0 +1,62 @@
+*.iml
+.gradle
+/local.properties
+/.idea/workspace.xml
+/.idea/libraries
+.DS_Store
+/build
+/captures
+*.keystore
+.externalNativeBuild
+
+# files for the dex VM
+*.dex
+
+# Java class files
+*.class
+
+# VS Code generates this.
+/.vscode
+.settings/
+
+# generated files
+bin/
+gen/
+out/
+build/
+.gradle/
+.ART
+# Project files
+*.iml
+.idea
+.idea/workspace.xml
+.classpath
+.project
+*.so
+*.o
+*.apk
+
+
+# Local configuration file (sdk path, etc)
+local.properties
+keystore.properties
+go.properties
+
+# Values file
+values.properties
+
+# Mac OS X clutter
+*.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+
+# Idea non-crucial project fileS
+*.iws
+
+# Sandbox stuff
+_sandbox
