@@ -8,6 +8,7 @@ import io.reactivex.Flowable
 import io.reactivex.Single
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import org.json.JSONObject
 
 class FlickrImagesDataSource(private val okHttpClient: OkHttpClient) : ImagesDataSource {
 
@@ -18,21 +19,50 @@ class FlickrImagesDataSource(private val okHttpClient: OkHttpClient) : ImagesDat
                     url(String.format(SEARCH_URL_FORMAT, query, page))
                     build()
                 }
-                okHttpClient.newCall(request).execute().use { response ->
-                    if (response.isSuccessful) {
-                        val json = response.body()?.string()
-                        emitter.onSuccess(ArrayList<ImageResult>().apply {
-                            repeat(10) {
-                                add(ImageResult("https://i.imgur.com/PrxPeJJ.jpg"))
+                try {
+                    okHttpClient.newCall(request).execute().use { response ->
+                        if (response.isSuccessful) {
+                            val json = response.body()?.string()
+                            if (json != null) {
+                                emitter.onSuccess(parseImagesFromJson(json))
+                            } else {
+                                emitter.tryOnError(NetworkException("Could not parse response body"))
                             }
-                        })
-                    } else {
-                        emitter.tryOnError(NetworkException("Request failed with status code : ${response.code()}"))
+                        } else {
+                            emitter.tryOnError(NetworkException("Request failed with status code : ${response.code()}"))
+                        }
                     }
+                } catch (e: Exception) {
+                    emitter.tryOnError(e)
                 }
             }.toFlowable()
             .compose(Result.applyToFlowable())
     }
+
+
+    private fun parseImagesFromJson(json: String): List<ImageResult> {
+        val photos = JSONObject(json)
+            .getJSONObject("photos")
+            .getJSONArray("photo")
+        return ArrayList<ImageResult>().apply {
+            for (i in 0 until photos.length()) {
+                photos.getJSONObject(i).run {
+                    add(
+                        ImageResult(
+                            String.format(
+                                IMAGE_URL_FORMAT,
+                                getString("farm"),
+                                getString("server"),
+                                getString("id"),
+                                getString("secret")
+                            )
+                        )
+                    )
+                }
+            }
+        }
+    }
+
 
     companion object {
         private const val SEARCH_URL_FORMAT =
@@ -44,5 +74,7 @@ class FlickrImagesDataSource(private val okHttpClient: OkHttpClient) : ImagesDat
                     "&safe_search=1" +
                     "&text=%s" +
                     "&page=%d"
+
+        private const val IMAGE_URL_FORMAT = "http://farm%s.static.flickr.com/%s/%s_%s.jpg"
     }
 }
