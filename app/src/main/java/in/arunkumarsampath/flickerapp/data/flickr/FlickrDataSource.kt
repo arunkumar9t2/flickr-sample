@@ -40,6 +40,9 @@ class FlickrImagesDataSource(private val okHttpClient: OkHttpClient) : ImagesDat
     }
 
 
+    /**
+     * Parses given json response into [List]ImageResults
+     */
     private fun parseImagesFromJson(json: String): List<ImageResult> {
         val photos = JSONObject(json)
             .getJSONObject("photos")

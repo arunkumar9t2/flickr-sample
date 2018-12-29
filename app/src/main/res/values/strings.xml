@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Flicker app</string>
     <string name="search_flickr">Search Flickr</string>
+    <string name="error_occured">Error occured during fetching images</string>
 </resources>

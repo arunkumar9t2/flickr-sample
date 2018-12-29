@@ -7,6 +7,7 @@ import `in`.arunkumarsampath.flickerapp.util.Result
 import `in`.arunkumarsampath.flickerapp.util.loge
 import android.graphics.Point
 import android.os.Bundle
+import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SearchView
@@ -14,12 +15,24 @@ import android.view.Menu
 import kotlinx.android.synthetic.main.activity_main.*
 
 class HomeActivity : AppCompatActivity() {
-
+    /**
+     * Presenter to lift data layer and logical code out of the activity.
+     */
     private val homePresenter by lazy { DependencyInjector.provideHomePresenter() }
     private val imagesAdapter by lazy { DependencyInjector.provideImagesAdapter() }
 
+    /**
+     * State variable to track query across configuration changes.
+     *
+     * @see onSaveInstanceState
+     * @see restoreState
+     */
     private var initialQuery = ""
 
+    /**
+     * Reference to [SearchView] inflated via [getMenuInflater]. Should be accessed after [onCreateOptionsMenu], otherwise
+     * not initialized exception will be thrown.
+     */
     private lateinit var searchView: SearchView
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -68,6 +81,10 @@ class HomeActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Handles common logic when a new list of images are received for either new search or new page.
+     * After the logic(loading indicators) is performed the list can be accessed in [images] callback
+     */
     private fun handleImagesResult(result: Result<List<ImageResult>>, images: (List<ImageResult>) -> Unit) {
         when (result) {
             is Result.Loading -> {
@@ -80,6 +97,7 @@ class HomeActivity : AppCompatActivity() {
             is Result.Failure -> {
                 loading(false)
                 loge(TAG, "Loading failed", result.throwable)
+                Snackbar.make(coordinatorLayout, R.string.error_occured, Snackbar.LENGTH_LONG).show()
             }
         }
     }
@@ -101,6 +119,10 @@ class HomeActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
     }
 
+    /**
+     * Binds [HomePresenter] with [SearchView] actions and restores state if this activity instance was recreated part
+     * of config change.
+     */
     private fun setupSearchView() {
         searchView.run {
             // Set initial query as part of state restoration

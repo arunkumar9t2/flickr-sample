@@ -8,6 +8,9 @@ import io.reactivex.Maybe
 
 class MemoryImageCache : ImageCache {
 
+    /**
+     * LRU memory cache to store [Bitmap]s identified by their url
+     */
     private val memoryCache by lazy {
         // Use a memory cache upto 1/8 of available memory
         val cacheMemory = (Runtime.getRuntime().maxMemory() / 1024) / 8

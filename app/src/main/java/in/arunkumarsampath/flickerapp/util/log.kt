@@ -5,6 +5,10 @@ package `in`.arunkumarsampath.flickerapp.util
 import `in`.arunkumarsampath.flickerapp.BuildConfig
 import android.util.Log
 
+/**
+ * Logging extensions to automatically remove Log statements in release builds.
+ */
+
 inline fun logd(tag: String, msg: String?, include: Boolean = BuildConfig.DEBUG) {
     if (include) {
         Log.d(tag, msg)

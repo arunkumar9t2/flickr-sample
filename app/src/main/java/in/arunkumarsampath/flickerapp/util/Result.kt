@@ -2,6 +2,9 @@ package `in`.arunkumarsampath.flickerapp.util
 
 import io.reactivex.FlowableTransformer
 
+/**
+ * Sealed type to denote Loading content and error easily in Rx stream.
+ */
 sealed class Result<T> {
     data class Success<T>(val data: T) : Result<T>()
     class Loading<T> : Result<T>()
