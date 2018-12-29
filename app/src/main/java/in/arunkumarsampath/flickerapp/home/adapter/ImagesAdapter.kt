@@ -2,13 +2,23 @@ package `in`.arunkumarsampath.flickerapp.home.adapter
 
 import `in`.arunkumarsampath.flickerapp.R
 import `in`.arunkumarsampath.flickerapp.data.ImageResult
+import `in`.arunkumarsampath.flickerapp.util.images.ImageLoader
+import android.app.Application
+import android.graphics.drawable.Drawable
+import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.extensions.LayoutContainer
+import kotlinx.android.synthetic.main.layout_flicker_image_item_template.*
 
-class ImagesAdapter : RecyclerView.Adapter<ImagesAdapter.ImageViewHolder>() {
+class ImagesAdapter(
+    private val application: Application,
+    private val imageLoader: ImageLoader
+) : RecyclerView.Adapter<ImagesAdapter.ImageViewHolder>() {
+
+    private val placeholder by lazy { ContextCompat.getDrawable(application, R.drawable.ic_refresh_24dp)!! }
 
     init {
         setHasStableIds(true)
@@ -19,7 +29,7 @@ class ImagesAdapter : RecyclerView.Adapter<ImagesAdapter.ImageViewHolder>() {
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
-    ): ImageViewHolder = ImageViewHolder.create(parent)
+    ): ImageViewHolder = ImageViewHolder.create(parent, imageLoader, placeholder)
 
     override fun onBindViewHolder(
         holder: ImageViewHolder,
@@ -48,23 +58,39 @@ class ImagesAdapter : RecyclerView.Adapter<ImagesAdapter.ImageViewHolder>() {
         notifyItemRangeInserted(positionStart, itemCount)
     }
 
-    class ImageViewHolder(override val containerView: View) : RecyclerView.ViewHolder(containerView), LayoutContainer {
+    fun cleanup() {
+        imageLoader.cleanup()
+    }
+
+    class ImageViewHolder(
+        override val containerView: View,
+        private val imageLoader: ImageLoader,
+        private val placeholder: Drawable
+    ) : RecyclerView.ViewHolder(containerView), LayoutContainer {
 
         fun bindImageResult(imageResult: ImageResult) {
-            // Load image
+            imageView.setImageDrawable(placeholder)
+            imageLoader.loadUrl(
+                imageView = imageView,
+                url = imageResult.imageUrl
+            )
         }
 
         companion object {
-            fun create(parent: ViewGroup): ImageViewHolder {
-                return ImageViewHolder(
-                    LayoutInflater.from(parent.context)
-                        .inflate(
-                            R.layout.layout_flicker_image_item_template,
-                            parent,
-                            false
-                        )
-                )
-            }
+            fun create(
+                parent: ViewGroup,
+                imageLoader: ImageLoader,
+                placeholder: Drawable
+            ) = ImageViewHolder(
+                LayoutInflater.from(parent.context)
+                    .inflate(
+                        R.layout.layout_flicker_image_item_template,
+                        parent,
+                        false
+                    ),
+                imageLoader,
+                placeholder
+            )
         }
     }
 }

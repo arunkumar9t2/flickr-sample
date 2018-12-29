@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v7.widget.AppCompatImageView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/flickerImage"
-    android:layout_width="100dp"
-    android:layout_height="100dp"
-    android:scaleType="centerCrop"
-    app:srcCompat="@android:drawable/sym_def_app_icon" />
+    android:id="@+id/imageView"
+    android:layout_width="match_parent"
+    android:layout_height="150dp"
+    android:scaleType="centerCrop" />

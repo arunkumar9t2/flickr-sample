@@ -3,7 +3,6 @@ package `in`.arunkumarsampath.flickerapp.home
 import `in`.arunkumarsampath.flickerapp.R
 import `in`.arunkumarsampath.flickerapp.data.ImageResult
 import `in`.arunkumarsampath.flickerapp.di.DependencyInjector
-import `in`.arunkumarsampath.flickerapp.home.adapter.ImagesAdapter
 import `in`.arunkumarsampath.flickerapp.util.Result
 import `in`.arunkumarsampath.flickerapp.util.loge
 import android.graphics.Point
@@ -16,9 +15,8 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class HomeActivity : AppCompatActivity() {
 
-    val homePresenter by lazy { DependencyInjector.provideHomePresenter() }
-
-    private val imagesAdapter = ImagesAdapter()
+    private val homePresenter by lazy { DependencyInjector.provideHomePresenter() }
+    private val imagesAdapter by lazy { DependencyInjector.provideImagesAdapter() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,14 +36,16 @@ class HomeActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         homePresenter.cleanup()
+        imagesAdapter.cleanup()
+        super.onDestroy()
     }
 
     private fun setupPresenter() {
         homePresenter.run {
             onImagesLoaded = {
                 handleImagesResult(it, imagesAdapter::setImages)
+                imagesListView.scrollToPosition(0)
             }
             onNewPageLoaded = {
                 handleImagesResult(it, imagesAdapter::addImages)
@@ -100,14 +100,14 @@ class HomeActivity : AppCompatActivity() {
             setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String?): Boolean {
                     query?.let {
-                        homePresenter.onQueryChanged(query)
+                        homePresenter.onQueryChanged(query.trim())
                     }
                     return true
                 }
 
                 override fun onQueryTextChange(newText: String?): Boolean {
                     newText?.let {
-                        homePresenter.onQueryChanged(newText)
+                        homePresenter.onQueryChanged(newText.trim())
                     }
                     return true
                 }
