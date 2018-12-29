@@ -2,6 +2,7 @@ package `in`.arunkumarsampath.flickerapp.di
 
 import `in`.arunkumarsampath.flickerapp.data.ImagesDataSource
 import `in`.arunkumarsampath.flickerapp.data.flickr.FlickrImagesDataSource
+import `in`.arunkumarsampath.flickerapp.data.mock.MockImagesDataSource
 import `in`.arunkumarsampath.flickerapp.di.DependencyInjector.setup
 import `in`.arunkumarsampath.flickerapp.home.HomePresenter
 import `in`.arunkumarsampath.flickerapp.home.adapter.ImagesAdapter
@@ -10,6 +11,7 @@ import `in`.arunkumarsampath.flickerapp.util.images.cache.ImageCache
 import `in`.arunkumarsampath.flickerapp.util.images.cache.MemoryImageCache
 import `in`.arunkumarsampath.flickerapp.util.schedulers.AppSchedulerProvider
 import `in`.arunkumarsampath.flickerapp.util.schedulers.SchedulerProvider
+import `in`.arunkumarsampath.flickerapp.util.schedulers.TestSchedulerProvider
 import android.app.Application
 import okhttp3.Cache
 import okhttp3.OkHttpClient
@@ -81,7 +83,7 @@ object DependencyInjector {
     val schedulerProvider: SchedulerProvider by lazy {
         when (schedulerType) {
             SchedulerType.APP -> AppSchedulerProvider()
-            SchedulerType.TEST -> AppSchedulerProvider()
+            SchedulerType.TEST -> TestSchedulerProvider()
         }
     }
 
@@ -90,7 +92,7 @@ object DependencyInjector {
      */
     val imagesDataSource: ImagesDataSource by lazy {
         when (imagesSource) {
-            ImagesSource.MOCK -> FlickrImagesDataSource(okHttpClient)
+            ImagesSource.MOCK -> MockImagesDataSource()
             ImagesSource.FLICKR -> FlickrImagesDataSource(okHttpClient)
         }
     }
