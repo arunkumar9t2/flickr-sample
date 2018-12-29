@@ -1,8 +1,10 @@
 package `in`.arunkumarsampath.flickerapp.di
 
-import `in`.arunkumarsampath.flickerapp.data.ImagesDataSource
-import `in`.arunkumarsampath.flickerapp.data.flickr.FlickrImagesDataSource
-import `in`.arunkumarsampath.flickerapp.data.mock.MockImagesDataSource
+import `in`.arunkumarsampath.flickerapp.data.DefaultImageRepository
+import `in`.arunkumarsampath.flickerapp.data.ImagesRepository
+import `in`.arunkumarsampath.flickerapp.data.source.ImagesDataSource
+import `in`.arunkumarsampath.flickerapp.data.source.flickr.FlickrImagesDataSource
+import `in`.arunkumarsampath.flickerapp.data.source.mock.MockImagesDataSource
 import `in`.arunkumarsampath.flickerapp.di.DependencyInjector.setup
 import `in`.arunkumarsampath.flickerapp.home.HomePresenter
 import `in`.arunkumarsampath.flickerapp.home.adapter.ImagesAdapter
@@ -97,12 +99,16 @@ object DependencyInjector {
         }
     }
 
+    val imageRepository: ImagesRepository by lazy {
+        DefaultImageRepository(remoteDataSource = imagesDataSource)
+    }
+
     /**
      * Singleton instance of [MemoryImageCache]
      */
     val imageCache: ImageCache by lazy { MemoryImageCache() }
 
-    fun provideHomePresenter() = HomePresenter(imagesDataSource, schedulerProvider)
+    fun provideHomePresenter() = HomePresenter(imageRepository, schedulerProvider)
 
     fun provideImageLoader() = DefaultImageLoader(schedulerProvider, imageCache, okHttpClient)
 

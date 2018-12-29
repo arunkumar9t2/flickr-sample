@@ -1,7 +1,7 @@
 package `in`.arunkumarsampath.flickerapp.home
 
 import `in`.arunkumarsampath.flickerapp.data.ImageResult
-import `in`.arunkumarsampath.flickerapp.data.ImagesDataSource
+import `in`.arunkumarsampath.flickerapp.data.ImagesRepository
 import `in`.arunkumarsampath.flickerapp.util.Result
 import `in`.arunkumarsampath.flickerapp.util.schedulers.SchedulerProvider
 import io.reactivex.Flowable
@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit
  * 2. onNewPageLoaded - Returns list of images loaded for given pages.
  */
 class HomePresenter(
-    private val imagesDataSource: ImagesDataSource,
+    private val imagesRepository: ImagesRepository,
     private val schedulerProvider: SchedulerProvider
 ) {
     /**
@@ -57,7 +57,7 @@ class HomePresenter(
                 pageLoadRequest = PageLoadRequest(it, 1)
                 return@map pageLoadRequest
             }.switchMap { (query, page) ->
-                val searchFirstPage = imagesDataSource.search(query, page)
+                val searchFirstPage = imagesRepository.search(query, page)
                     .subscribeOn(schedulerProvider.io)
                     .map { it to page }
                     .doOnComplete(::incrementPage)
@@ -66,7 +66,7 @@ class HomePresenter(
                     .onBackpressureBuffer()
                     .distinctUntilChanged()
                     .concatMap { (query, page) ->
-                        imagesDataSource.search(query, page)
+                        imagesRepository.search(query, page)
                             .subscribeOn(schedulerProvider.io)
                             .map { it to page }
                             .doOnComplete(::incrementPage)

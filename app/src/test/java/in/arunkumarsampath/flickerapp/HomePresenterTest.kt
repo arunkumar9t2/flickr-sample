@@ -1,7 +1,7 @@
 package `in`.arunkumarsampath.flickerapp
 
 import `in`.arunkumarsampath.flickerapp.data.ImageResult
-import `in`.arunkumarsampath.flickerapp.data.mock.MockImagesDataSource
+import `in`.arunkumarsampath.flickerapp.data.source.mock.MockImagesDataSource
 import `in`.arunkumarsampath.flickerapp.di.DependencyInjector
 import `in`.arunkumarsampath.flickerapp.home.HomePresenter
 import `in`.arunkumarsampath.flickerapp.util.Result
