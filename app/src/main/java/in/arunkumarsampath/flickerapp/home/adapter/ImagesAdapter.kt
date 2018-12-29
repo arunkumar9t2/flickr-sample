@@ -12,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.main.layout_flicker_image_item_template.*
+import kotlinx.android.synthetic.main.layout_flicker_image_item_template.view.*
 
 class ImagesAdapter(
     private val application: Application,
@@ -60,6 +61,11 @@ class ImagesAdapter(
 
     fun cleanup() {
         imageLoader.cleanup()
+    }
+
+    override fun onViewDetachedFromWindow(holder: ImageViewHolder) {
+        super.onViewDetachedFromWindow(holder)
+        imageLoader.cancel(holder.containerView.imageView)
     }
 
     class ImageViewHolder(

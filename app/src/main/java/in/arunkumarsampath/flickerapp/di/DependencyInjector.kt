@@ -5,6 +5,8 @@ import `in`.arunkumarsampath.flickerapp.data.flickr.FlickrImagesDataSource
 import `in`.arunkumarsampath.flickerapp.home.HomePresenter
 import `in`.arunkumarsampath.flickerapp.home.adapter.ImagesAdapter
 import `in`.arunkumarsampath.flickerapp.util.images.DefaultImageLoader
+import `in`.arunkumarsampath.flickerapp.util.images.cache.ImageCache
+import `in`.arunkumarsampath.flickerapp.util.images.cache.MemoryImageCache
 import `in`.arunkumarsampath.flickerapp.util.schedulers.AppSchedulerProvider
 import android.app.Application
 import okhttp3.Cache
@@ -66,9 +68,11 @@ object DependencyInjector {
         }
     }
 
+    val imageCache: ImageCache by lazy { MemoryImageCache() }
+
     fun provideHomePresenter() = HomePresenter(imagesDataSource, schedulerProvider)
 
-    fun provideImageLoader() = DefaultImageLoader(schedulerProvider, okHttpClient)
+    fun provideImageLoader() = DefaultImageLoader(schedulerProvider, imageCache, okHttpClient)
 
     fun provideImagesAdapter() = ImagesAdapter(application, provideImageLoader())
 }

@@ -6,5 +6,7 @@ interface ImageLoader {
 
     fun loadUrl(imageView: ImageView, url: String)
 
+    fun cancel(imageView: ImageView)
+
     fun cleanup()
 }

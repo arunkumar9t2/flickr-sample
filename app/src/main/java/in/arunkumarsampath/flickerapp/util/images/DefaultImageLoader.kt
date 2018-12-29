@@ -1,9 +1,10 @@
 package `in`.arunkumarsampath.flickerapp.util.images
 
 import `in`.arunkumarsampath.flickerapp.util.doOnLayout
+import `in`.arunkumarsampath.flickerapp.util.images.cache.ImageCache
+import `in`.arunkumarsampath.flickerapp.util.logd
 import `in`.arunkumarsampath.flickerapp.util.loge
 import `in`.arunkumarsampath.flickerapp.util.schedulers.SchedulerProvider
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.widget.ImageView
 import io.reactivex.Flowable
@@ -16,16 +17,12 @@ import java.lang.ref.WeakReference
 
 class DefaultImageLoader(
     private val schedulerProvider: SchedulerProvider,
+    private val imageCache: ImageCache,
     private val okHttpClient: OkHttpClient
 ) : ImageLoader {
 
-    data class ImageLoadParams(
-        val imageViewReference: WeakReference<ImageView>,
-        val url: String,
-        val bitmap: Bitmap? = null
-    )
-
     private val loadQueue = PublishProcessor.create<ImageLoadParams>()
+    private val cancelProcessor = PublishProcessor.create<ImageView>()
 
     private val subs = CompositeDisposable()
 
@@ -34,7 +31,6 @@ class DefaultImageLoader(
     }
 
     private fun initLoadQueueProcessor() {
-
         val imageLoader: (ImageLoadParams) -> Flowable<ImageLoadParams> = { imageLoadParams ->
             waitForLayout(imageLoadParams)
                 .flatMap(::loadImage)
@@ -47,9 +43,7 @@ class DefaultImageLoader(
             .onBackpressureBuffer()
             .concatMapEager(imageLoader, MAX_CONCURRENT_REQUESTS, Flowable.bufferSize())
             .observeOn(schedulerProvider.ui)
-            .doOnError {
-                loge(TAG, "initLoadQueueProcessor", it)
-            }
+            .doOnError { loge(TAG, "initLoadQueueProcessor", it) }
             .subscribe { imageLoadParams ->
                 imageLoadParams.run {
                     imageViewReference.get()?.setImageBitmap(bitmap)
@@ -62,46 +56,63 @@ class DefaultImageLoader(
         loadQueue.onNext(ImageLoadParams(WeakReference(imageView), url))
     }
 
+    override fun cancel(imageView: ImageView) {
+        cancelProcessor.onNext(imageView)
+    }
 
-    private fun waitForLayout(loadData: ImageLoadParams) =
-        Single
-            .create<ImageLoadParams> { emitter ->
-                loadData.imageViewReference
-                    .get()?.doOnLayout {
-                        // Safe to access width and height now
-                        emitter.onSuccess(loadData)
-                    } ?: emitter.tryOnError(IllegalStateException("ImageView has been garbage collected"))
-            }.doOnError {
-                loge(TAG, "waitForLayout", it)
-            }.onErrorReturnItem(loadData)
+
+    private fun waitForLayout(loadData: ImageLoadParams) = Single
+        .create<ImageLoadParams> { emitter ->
+            loadData.imageViewReference
+                .get()?.doOnLayout {
+                    // Safe to access width and height now
+                    emitter.onSuccess(loadData)
+                } ?: emitter.tryOnError(IllegalStateException("ImageView has been garbage collected"))
+        }.doOnError {
+            loge(TAG, "waitForLayout", it)
+        }.onErrorReturnItem(loadData)
 
 
     private fun loadImage(imageLoadParams: ImageLoadParams): Single<ImageLoadParams> {
-        return Single
-            .fromCallable {
-                val imageView =
-                    imageLoadParams.imageViewReference.get()
+        val networkLoader = Single
+            .create<ImageLoadParams> { emitter ->
+                try {
+                    val imageView = imageLoadParams.imageViewReference.get()
                         ?: throw IllegalStateException("ImageView garbage collected")
 
-                // Get the stream from URL
-                val request = Request.Builder().url(imageLoadParams.url).build()
+                    // Get the stream from URL
+                    val request = Request.Builder().url(imageLoadParams.url).build()
 
-                okHttpClient
-                    .newCall(request)
-                    .execute()
-                    .use { response ->
-                        // Create BitmapOptions to ask decoder to decode just the bounds first
-                        val options = BitmapFactory.Options().apply {
-                            inJustDecodeBounds = true
+                    val call = okHttpClient.newCall(request).apply {
+                        execute().use { response ->
+                            // Create BitmapOptions to ask decoder to decode just the bounds first
+                            val options = BitmapFactory.Options().apply {
+                                inJustDecodeBounds = true
+                            }
+                            // Calculate sample size based on imageView's dimensions
+                            calculateInSampleSize(options, imageView.width, imageView.height)
+                            // Safe to decode
+                            val bitmap = BitmapFactory.decodeStream(response.body()?.byteStream())
+                            emitter.onSuccess(imageLoadParams.copy(bitmap = bitmap))
                         }
-                        // Calculate sample size based on imageView's dimensions
-                        calculateInSampleSize(options, imageView.width, imageView.height)
-                        // Safe to decode
-                        imageLoadParams.copy(bitmap = BitmapFactory.decodeStream(response.body()?.byteStream()))
                     }
-            }.doOnError { loge(TAG, "loadImage", it) }
+                    emitter.setCancellable {
+                        logd(TAG, "Cancelled ${imageLoadParams.url}")
+                        call.cancel()
+                    }
+                } catch (e: Exception) {
+                    // Return source as-is
+                    emitter.onSuccess(imageLoadParams)
+                    // emitter.tryOnError(e)
+                }
+            }.takeUntil(cancelProcessor.filter { imageLoadParams.imageViewReference.get() == it })
             .onErrorReturnItem(imageLoadParams)
+            .flatMap { params -> imageCache.save(params).toSingleDefault(params) }
             .subscribeOn(schedulerProvider.io)
+
+        return imageCache.get(imageLoadParams)
+            .map { bitmap -> imageLoadParams.copy(bitmap = bitmap) }
+            .switchIfEmpty(networkLoader)
     }
 
 
@@ -122,6 +133,7 @@ class DefaultImageLoader(
     }
 
     override fun cleanup() {
+        imageCache.drop()
         subs.clear()
     }
 
