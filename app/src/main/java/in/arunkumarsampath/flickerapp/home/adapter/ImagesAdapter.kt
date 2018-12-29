@@ -63,8 +63,8 @@ class ImagesAdapter(
         imageLoader.cleanup()
     }
 
-    override fun onViewDetachedFromWindow(holder: ImageViewHolder) {
-        super.onViewDetachedFromWindow(holder)
+    override fun onViewRecycled(holder: ImageViewHolder) {
+        super.onViewRecycled(holder)
         imageLoader.cancel(holder.containerView.imageView)
     }
 

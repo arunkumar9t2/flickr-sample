@@ -2,7 +2,6 @@ package `in`.arunkumarsampath.flickerapp.util.images
 
 import `in`.arunkumarsampath.flickerapp.util.doOnLayout
 import `in`.arunkumarsampath.flickerapp.util.images.cache.ImageCache
-import `in`.arunkumarsampath.flickerapp.util.logd
 import `in`.arunkumarsampath.flickerapp.util.loge
 import `in`.arunkumarsampath.flickerapp.util.schedulers.SchedulerProvider
 import android.graphics.BitmapFactory
@@ -41,7 +40,7 @@ class DefaultImageLoader(
         loadQueue
             .observeOn(schedulerProvider.io)
             .onBackpressureBuffer()
-            .concatMapEager(imageLoader, MAX_CONCURRENT_REQUESTS, Flowable.bufferSize())
+            .flatMap(imageLoader, MAX_CONCURRENT_REQUESTS)
             .observeOn(schedulerProvider.ui)
             .doOnError { loge(TAG, "initLoadQueueProcessor", it) }
             .subscribe { imageLoadParams ->
@@ -96,10 +95,7 @@ class DefaultImageLoader(
                             emitter.onSuccess(imageLoadParams.copy(bitmap = bitmap))
                         }
                     }
-                    emitter.setCancellable {
-                        logd(TAG, "Cancelled ${imageLoadParams.url}")
-                        call.cancel()
-                    }
+                    emitter.setCancellable { call.cancel() }
                 } catch (e: Exception) {
                     // Return source as-is
                     emitter.onSuccess(imageLoadParams)
