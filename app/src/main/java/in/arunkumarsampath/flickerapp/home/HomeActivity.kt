@@ -18,19 +18,29 @@ class HomeActivity : AppCompatActivity() {
     private val homePresenter by lazy { DependencyInjector.provideHomePresenter() }
     private val imagesAdapter by lazy { DependencyInjector.provideImagesAdapter() }
 
+    private var initialQuery = ""
+
+    private lateinit var searchView: SearchView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setupToolbar()
         setupImagesList()
         setupPresenter()
+        restoreState(savedInstanceState)
+    }
+
+    private fun restoreState(savedInstanceState: Bundle?) {
+        initialQuery = savedInstanceState?.getString(EXTRA_QUERY, "") ?: ""
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menu?.let {
             menuInflater.inflate(R.menu.home_menu, menu)
             val searchItem = menu.findItem(R.id.menuSearchItem)
-            setupSearchView(searchItem.actionView as SearchView)
+            searchView = searchItem.actionView as SearchView
+            setupSearchView()
         }
         return super.onCreateOptionsMenu(menu)
     }
@@ -39,6 +49,11 @@ class HomeActivity : AppCompatActivity() {
         homePresenter.cleanup()
         imagesAdapter.cleanup()
         super.onDestroy()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle?) {
+        super.onSaveInstanceState(outState)
+        outState?.putString(EXTRA_QUERY, searchView.query.toString())
     }
 
     private fun setupPresenter() {
@@ -86,8 +101,12 @@ class HomeActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
     }
 
-    private fun setupSearchView(searchView: SearchView) {
+    private fun setupSearchView() {
         searchView.run {
+            // Set initial query as part of state restoration
+            setQuery(initialQuery, true)
+            homePresenter.onQueryChanged(initialQuery)
+            isIconified = false
             queryHint = getString(R.string.search_flickr)
             // Let the search view take full width of the screen.
             // The default behavior does not look good in landscape mode since width is constrained.
@@ -124,5 +143,7 @@ class HomeActivity : AppCompatActivity() {
 
     companion object {
         private val TAG = HomeActivity::class.java.name
+
+        private const val EXTRA_QUERY = "EXTRA_QUERY"
     }
 }

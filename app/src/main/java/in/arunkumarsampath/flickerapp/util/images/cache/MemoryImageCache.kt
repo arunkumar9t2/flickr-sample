@@ -1,7 +1,6 @@
 package `in`.arunkumarsampath.flickerapp.util.images.cache
 
 import `in`.arunkumarsampath.flickerapp.util.images.ImageLoadParams
-import `in`.arunkumarsampath.flickerapp.util.logv
 import android.graphics.Bitmap
 import android.support.v4.util.LruCache
 import io.reactivex.Completable
@@ -25,7 +24,6 @@ class MemoryImageCache : ImageCache {
     override fun save(loadParams: ImageLoadParams) = Completable.fromAction {
         loadParams.bitmap?.let {
             memoryCache.put(loadParams.url, loadParams.bitmap)
-            logv(TAG, "Saved ${loadParams.url} to cache")
         }
     }
 
