@@ -20,7 +20,7 @@ Due to time constraints below shortcuts were taken:
  - **OkHttp** - Used for easier networking to fetch `json` and `input stream` for `Bitmap`s.
 
 ## Architecture
-MVP model to avoid logical code in `Activity`. Loose coupling by making code dependent on interfaces rather than implementations eg: `ImageCache`, `ImagesDataSource`, `ImageLoader`. Explicit dependency on Flickr is avoided and is accessed through contracts.
+MVP with Repository to avoid logical code in `Activity` and separate data related code. Loose coupling by making code dependent on interfaces rather than implementations eg: `ImageCache`, `ImagesDataSource`, `ImageLoader`. Explicit dependency on Flickr is avoided and is accessed through contracts.
 
  - `data` - `ImagesDataSource` is a contract for a source that provides paged searching. `FlickrImagesDataSource` is an implementation backed by `Flickr API`. Also includes data classes for parsing `json` response.
  - `DepedencyInjector` - Utility class to manage dependencies throughout the app. Responsible for managing and providing dependencies when requested. Eg: `DependencyInjector.provideHomePresenter`.
@@ -44,5 +44,5 @@ MVP model to avoid logical code in `Activity`. Loose coupling by making code dep
 		- Currently only the search term is restored upon a config change, this could be changed to use `ViewModel` pattern to cache the image list as well to avoid additional network calls.
 - `Better Error handling` 
 		- When a paged list fails to load, possibly a retry button could be used to restart failed requests.
-- `Repository` - Introduce repo pattern for managing multiple `ImageDataSource`s.
 - `Test` - Additional integration tests to avoid breakage due to 3rd parties.
+- `LocalDataSource` - Implement a local data source for provide search results stored on disk.

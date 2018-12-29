@@ -57,6 +57,7 @@ class HomePresenterTest {
             }
         }.test()
 
+        homePresenter.onQueryChanged("test")
         homePresenter.loadNextPage()
 
         newPagesObsTester
