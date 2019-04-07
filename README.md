@@ -27,8 +27,8 @@ MVP with Repository to avoid logical code in `Activity` and separate data relate
  - `DepedencyInjector` - Utility class to manage dependencies throughout the app. Responsible for managing and providing dependencies when requested. Eg: `DependencyInjector.provideHomePresenter`.
  - `Image Loading` - `ImageLoader` and `ImageCache` are contracts for a system that loads images efficiently by reducing sample size, perform concurrent requests and caching.
  
-		 - `DefaultImageLoader` - Loader backed by Rx to handle multiple requests and decode images.
-		 - `MemoryImageCache` - Lru based memory cache to hold few `Bitmap`s in memory.
+	- `DefaultImageLoader` - Loader backed by Rx to handle multiple requests and decode images.
+	- `MemoryImageCache` - Lru based memory cache to hold few `Bitmap`s in memory.
  - `SchedulerProvider` - Contract to provide various type of `Schedulers` for concurrency. Can be replaced during testing via DI.
  - `Home` - Home feature package that contains, presenter for communicating with data layer, adapter for rendering grid and `HomeActivity`
  - `Test` - Presenter test for search term achieved by injecting `MockImagesDataSource` and testing paging and searches.
