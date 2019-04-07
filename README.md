@@ -11,7 +11,7 @@ Simple image search app using the Flickr Image Search API.
 ![enter image description here](https://github.com/arunkumar9t2/flickr-sample/raw/master/art/FlickrAppDemo.gif)
 
 # Overview
-Due to time constraints below shortcuts were taken:
+
 
  - **RxJava** - Used RxJava for easier concurrency and thread management. 
 	Example:
