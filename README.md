@@ -1,6 +1,7 @@
 # Introduction
 
 Simple image search app using the Flickr Image Search API. 
+
 **Features**:
  - Endless scrolling of search results
  - 3 column grid view of images
