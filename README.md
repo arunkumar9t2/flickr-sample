@@ -7,7 +7,7 @@ Simple image search app using the Flickr Image Search API.
  - Auto search as you type
 
 ## Demo
-![enter image description here](https://gitlab.com/arunkumar9t2/flickersample/raw/master/art/FlickrAppDemo.gif)
+![enter image description here](https://github.com/arunkumar9t2/flickr-sample/raw/master/art/FlickrAppDemo.gif)
 
 # Overview
 Due to time constraints below shortcuts were taken:
